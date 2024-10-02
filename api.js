@@ -1,18 +1,28 @@
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3001";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://server23.ms:3001";
 
 /** API Class.
  *
- * Static class tying together methods used to get/send to to the API.
+ * Static class tying together methods used to get/send to the API.
  * There shouldn't be any frontend-specific stuff here, and there shouldn't
  * be any API-aware stuff elsewhere in the frontend.
  *
  */
 
 class JoblyApi {
-  // the token for interactive with the API will be stored here.
+  // the token for interacting with the API will be stored here.
   static token;
+
+  /** Core request method.
+   * 
+   * - endpoint: the API endpoint (e.g., "companies")
+   * - data: an object of data to send to the API (for GET requests, it's query params)
+   * - method: HTTP method to use (defaults to "get")
+   * 
+   * Example: await JoblyApi.request("companies", { name: "rithm" });
+   *          => { companies: [{handle: "rithm", name: "Rithm School", ...}, ...] }
+   */
 
   static async request(endpoint, data = {}, method = "get") {
     console.debug("API Call:", endpoint, data, method);
@@ -43,10 +53,58 @@ class JoblyApi {
     return res.company;
   }
 
-  // obviously, you'll add a lot here ...
+  /** Get all companies (optionally filtered by name). 
+   * 
+   * This method allows for searching companies by a search term. 
+   * If no term is provided, it fetches all companies.
+   */
+  static async getCompanies(searchTerm = "") {
+    const res = await this.request("companies", { name: searchTerm });
+    return res.companies;
+  }
+
+  /** Get all jobs (optionally filtered by title).
+   * 
+   * This method allows for searching jobs by title. 
+   * If no title is provided, it fetches all jobs.
+   */
+  static async getJobs(title = "") {
+    const res = await this.request("jobs", { title });
+    return res.jobs;
+  }
+
+  /** Login a user and return their token.
+   * 
+   * This method will send the user's credentials and receive a token.
+   * The token will later be stored for authenticating requests.
+   */
+  static async login(username, password) {
+    const res = await this.request("auth/token", { username, password }, "post");
+    return res.token;
+  }
+
+  /** Signup a new user and return their token.
+   * 
+   * This method registers a new user and returns the token for that user.
+   */
+  static async signup(userData) {
+    const res = await this.request("auth/register", userData, "post");
+    return res.token;
+  }
+
+  /** Update user profile.
+   * 
+   * This method updates the profile of the current user.
+   */
+  static async updateProfile(username, data) {
+    const res = await this.request(`users/${username}`, data, "patch");
+    return res.user;
+  }
 }
 
 // for now, put token ("testuser" / "password" on class)
 JoblyApi.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZ" +
     "SI6InRlc3R1c2VyIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTU5ODE1OTI1OX0." +
     "FtrMwBQwe6Ue-glIFgz_Nf8XxRT2YecFCiSpYL0fCXc";
+
+export default JoblyApi;
