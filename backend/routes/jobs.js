@@ -50,25 +50,37 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/", async function (req, res, next) {
-  const q = req.query;
-  // arrive as strings from querystring, but we want as int/bool
-  if (q.minSalary !== undefined) q.minSalary = +q.minSalary;
-  q.hasEquity = q.hasEquity === "true";
+  router.get("/", async function (req, res, next) {
+    const q = req.query;
+  
+    // Convert query string values to proper types
+    if (q.minSalary !== undefined) q.minSalary = +q.minSalary;
+    q.hasEquity = q.hasEquity === "true";
+  
+    if (q.title === "") delete q.title;
 
-  try {
-    const validator = jsonschema.validate(q, jobSearchSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
-      throw new BadRequestError(errs);
+    try {
+      // If no query parameters are provided, return all jobs
+      if (Object.keys(q).length === 0) {
+        const jobs = await Job.findAll();  // Fetch all jobs
+        return res.json({ jobs });
+      }
+  
+      // If query parameters are provided, validate them
+      const validator = jsonschema.validate(q, jobSearchSchema);
+      if (!validator.valid) {
+        const errs = validator.errors.map(e => e.stack);
+        throw new BadRequestError(errs);
+      }
+  
+      // Fetch jobs based on query parameters
+      const jobs = await Job.findAll(q);
+      return res.json({ jobs });
+    } catch (err) {
+      return next(err);
     }
-
-    const jobs = await Job.findAll(q);
-    return res.json({ jobs });
-  } catch (err) {
-    return next(err);
-  }
-});
+  });
+  
 
 /** GET /[jobId] => { job }
  *

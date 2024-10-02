@@ -56,9 +56,7 @@ class Job {
     let whereExpressions = [];
     let queryValues = [];
 
-    // For each possible search term, add to whereExpressions and
-    // queryValues so we can generate the right SQL
-
+    // For each possible search term, add to whereExpressions and queryValues
     if (minSalary !== undefined) {
       queryValues.push(minSalary);
       whereExpressions.push(`salary >= $${queryValues.length}`);
@@ -68,21 +66,23 @@ class Job {
       whereExpressions.push(`equity > 0`);
     }
 
-    if (title !== undefined) {
+    // Add this condition to ignore empty strings for title
+    if (title && title.trim() !== "") {
       queryValues.push(`%${title}%`);
       whereExpressions.push(`title ILIKE $${queryValues.length}`);
     }
 
+    // If there are any WHERE conditions, add them to the base query
     if (whereExpressions.length > 0) {
       query += " WHERE " + whereExpressions.join(" AND ");
     }
 
     // Finalize query and return results
-
     query += " ORDER BY title";
     const jobsRes = await db.query(query, queryValues);
     return jobsRes.rows;
   }
+
 
   /** Given a job id, return data about job.
    *

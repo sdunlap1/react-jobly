@@ -57,7 +57,17 @@ router.get("/", async function (req, res, next) {
   if (q.minEmployees !== undefined) q.minEmployees = +q.minEmployees;
   if (q.maxEmployees !== undefined) q.maxEmployees = +q.maxEmployees;
 
+  // Ignore empty string for name
+  if (q.name === "") delete q.name;
+
   try {
+    // If no query parameters are provided, return all companies
+    if (Object.keys(q).length === 0) {
+      const companies = await Company.findAll();  // Fetch all companies
+      return res.json({ companies });
+    }
+
+  
     const validator = jsonschema.validate(q, companySearchSchema);
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);

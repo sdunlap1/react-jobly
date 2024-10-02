@@ -13,7 +13,8 @@
     },
     "name": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "nullable": true
     }
   },
   "additionalProperties": false,
