@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 function CompanyCard({ handle, name, description, logoUrl }) {
 
-  const logoSrc = logoUrl || '/logos/default-logo.png'; // Default logo if no logo exists
+  const logoSrc = logoUrl || '/logos/logo1.png'; // Default logo if no logo exists
 
   return (
     <div className="company-card">

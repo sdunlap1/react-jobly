@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import JobCard from '../components/JobCard';
 import JoblyApi from '../api';
 
 function CompanyDetail() {
@@ -17,17 +18,26 @@ function CompanyDetail() {
   if (!company) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="company-detail">
       <h1>{company.name}</h1>
       <p>{company.description}</p>
+
       <h3>Jobs at {company.name}</h3>
-      {company.jobs.map(job => (
-        <div key={job.id}>
-          <h4>{job.title}</h4>
-          <p>Salary: {job.salary ? `$${job.salary}` : "N/A"}</p>
-          <p>Equity: {job.equity}</p>
-        </div>
-      ))}
+      <div className="job-list">
+        {company.jobs.length ? (
+          company.jobs.map(job => (
+            <JobCard
+              key={job.id}
+              title={job.title}
+              salary={job.salary}
+              equity={job.equity}
+              companyName={company.name}  // Pass the company name as a prop
+            />
+          ))
+        ) : (
+          <p>No jobs available at this company.</p>
+        )}
+      </div>
     </div>
   );
 }
