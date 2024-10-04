@@ -4,7 +4,7 @@
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm start",
-    "client": "cd frontend && npm start"
+    "client": "cd frontend && HOST=server23.ms PORT=3000 npm start"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
