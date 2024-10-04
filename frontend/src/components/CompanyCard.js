@@ -1,9 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function CompanyCard({ handle, name, description, logoUrl }) {
-
+  const navigate = useNavigate(); // Hook to navigate programmatically
   const logoSrc = logoUrl || '/logos/logo1.png'; // Default logo if no logo exists
+
+  // Function to handle button click and navigate to company details page
+  const handleViewDetails = () => {
+    navigate(`/companies/${handle}`);
+  };
 
   return (
     <div className="company-card">
@@ -11,7 +16,7 @@ function CompanyCard({ handle, name, description, logoUrl }) {
       {/* Only renders the <img> tag if logoUrl exists */}
       <h3>{name}</h3>
       <p>{description}</p>
-      <Link to={`/companies/${handle}`}>View Details</Link>
+      <button onClick={handleViewDetails}>View Details</button> {/* Replaces the Link with a button */}
     </div>
   );
 }

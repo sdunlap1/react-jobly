@@ -29,16 +29,21 @@ class JoblyApi {
 
     //there are multiple ways to pass an authorization token, this is how you pass it in the header.
     //this has been provided to show you another way to pass the token. you are only expected to read this code for this project.
+    
+    // Get the token from localStorage if it's available
+    const token = JoblyApi.token || localStorage.getItem("token");
+
     const url = `${BASE_URL}/${endpoint}`;
-    const headers = { Authorization: `Bearer ${JoblyApi.token}` };
+    const headers = { Authorization: `Bearer ${token}` };  // Pass token in header
     const params = (method === "get")
         ? data
         : {};
 
     try {
+      // Perform the request and return the response data
       return (await axios({ url, method, data, params, headers })).data;
     } catch (err) {
-      console.error("API Error:", err.response);
+      // Log the API error and throw a message for further handling
       let message = err.response.data.error.message;
       throw Array.isArray(message) ? message : [message];
     }
@@ -78,7 +83,10 @@ class JoblyApi {
    * This method will send the user's credentials and receive a token.
    * The token will later be stored for authenticating requests.
    */
-  static async login(username, password) {
+  static async login({ username, password }) {
+    // Ensure username and password are passed as simple key-value pairs
+    console.log("API Call: auth/token", { username, password });
+
     const res = await this.request("auth/token", { username, password }, "post");
     return res.token;
   }
@@ -90,6 +98,12 @@ class JoblyApi {
   static async signup(userData) {
     const res = await this.request("auth/register", userData, "post");
     return res.token;
+  }
+
+   /** Get the current user's details by username */
+   static async getCurrentUser(username) {
+    const res = await this.request(`users/${username}`);
+    return res.user;
   }
 
   /** Update user profile.

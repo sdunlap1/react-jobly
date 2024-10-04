@@ -1,16 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import "./NavBar.css";  // You can style it separately with this file
+import './NavBar.css';
 
-function NavBar() {
+function NavBar({ currentUser, logout }) {
   return (
-    <nav className="navbar">
-      <ul>
-        <li><Link to="/companies">Companies</Link></li>
-        <li><Link to="/jobs">Jobs</Link></li>
-        <li><Link to="/login">Login</Link></li>
-        <li><Link to="/signup">Signup</Link></li>
-      </ul>
+    <nav className={currentUser ? "navbar logged-in" : "navbar logged-out"}>
+      <Link to="/">Home</Link>
+      {currentUser ? (
+        <>
+          <Link to="/companies">Companies</Link>
+          <Link to="/jobs">Jobs</Link>
+          <Link to="/profile">Profile</Link>
+          <button onClick={logout}>Log Out</button>
+          <span>Welcome, {currentUser.username}</span>
+        </>
+      ) : (
+        <>
+          <Link to="/login">Login</Link>
+          <Link to="/signup">Sign Up</Link>
+        </>
+      )}
     </nav>
   );
 }

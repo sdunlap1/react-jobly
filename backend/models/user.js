@@ -70,7 +70,6 @@ class User {
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
-
     const result = await db.query(
           `INSERT INTO users
            (username,
@@ -92,7 +91,6 @@ class User {
     );
 
     const user = result.rows[0];
-
     return user;
   }
 

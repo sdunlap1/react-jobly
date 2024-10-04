@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "../App.css";
 
-function SignupForm() {
+function SignupForm({ signup, currentUser }) {  
+  const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -10,14 +12,38 @@ function SignupForm() {
     email: ""
   });
 
+  const [formErrors, setFormErrors] = useState([]);
+
   const handleChange = evt => {
     const { name, value } = evt.target;
     setFormData(data => ({ ...data, [name]: value }));
   };
 
-  const handleSubmit = evt => {
+   // Redirect if user is already logged in
+   useEffect(() => {
+    if (currentUser) {
+      navigate("/profile");
+    }
+  }, [currentUser, navigate]);
+
+  const handleSubmit = async evt => {
     evt.preventDefault();
-    // Handle signup logic here
+
+    // Basic form validation: Check if fields are empty
+    if (!formData.username || !formData.password || !formData.firstName || !formData.lastName || !formData.email) {
+      setFormErrors(["All fields are required."]);
+      return;
+    }
+
+    const result = await signup(formData);
+
+    if (result.success) {
+      // Redirect to login page after successful signup
+      navigate("/");
+    } else {
+      // Display any errors that came from the signup process
+      setFormErrors(result.errors);
+    }
   };
 
   return (
@@ -65,6 +91,10 @@ function SignupForm() {
             onChange={handleChange}
           />
         </div>
+
+        {/* Display form errors */}
+        {formErrors.length ? <p className="error">{formErrors.join(", ")}</p> : null}
+
         <button type="submit">Signup</button>
       </form>
     </div>

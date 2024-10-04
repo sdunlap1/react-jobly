@@ -1,23 +1,28 @@
 import React from 'react';
-import CompanyCard from '../components/CompanyCard';
+import { Link } from 'react-router-dom';
+import { useUser } from '../context/UserContext'; // Use the useUser hook
 
 function Homepage() {
-  // You can pass test data to CompanyCard to see how it renders
+  const { currentUser } = useUser(); // Destructure currentUser from useUser hook
+
   const testCompany = {
-    name: "Test Company",
-    description: "This is a test company for testing purposes.",
-    logoUrl: "https://via.placeholder.com/150"
+    logoUrl: "logos/logo1.png"
   };
 
   return (
     <div>
-      <h1>Welcome to Jobly!</h1>
+      <h1>Welcome to Jobly{currentUser ? `, ${currentUser.username}` : "!"}</h1>
       <p>Your one-stop shop for job hunting and company listings.</p>
-      <CompanyCard 
-        name={testCompany.name}
-        description={testCompany.description}
-        logoUrl={testCompany.logoUrl}
-      />
+
+      <div className="TestCompanyCard">
+        <img src={testCompany.logoUrl} alt="Company Logo" />
+      </div>
+
+      {!currentUser && (
+        <p>
+          Please <Link to="/login">Log in</Link> or <Link to="/signup">Sign up</Link> to get started.
+        </p>
+      )}
     </div>
   );
 }
