@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import JoblyApi from './api'; 
-import Homepage from './pages/Homepage';
-import CompanyList from './pages/CompanyList';
-import CompanyDetail from './pages/CompanyDetail';
-import JobList from './pages/JobList';
-import LoginForm from './pages/LoginForm';
-import SignupForm from './pages/SignupForm';
-import ProfileForm from './pages/ProfileForm';
-import NavBar from './components/NavBar';
-import useLocalStorage from './hooks/useLocalStorage'; // Custom hook for local storage
-import ProtectedRoute from './components/ProtectedRoute';
-import { UserProvider } from './context/UserContext';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import JoblyApi from "./api";
+import Homepage from "./pages/Homepage";
+import CompanyList from "./pages/CompanyList";
+import CompanyDetail from "./pages/CompanyDetail";
+import JobList from "./pages/JobList";
+import LoginForm from "./pages/LoginForm";
+import SignupForm from "./pages/SignupForm";
+import ProfileForm from "./pages/ProfileForm";
+import NavBar from "./components/NavBar";
+import useLocalStorage from "./hooks/useLocalStorage"; // Custom hook for local storage
+import ProtectedRoute from "./components/ProtectedRoute";
+import { UserProvider } from "./context/UserContext";
 
 const TOKEN_STORAGE_ID = "jobly-token"; // ID to save token in localStorage
 
@@ -31,7 +31,6 @@ function App() {
           const user = await JoblyApi.getCurrentUser(username);
           setCurrentUser(user); // Store the current user
         } catch (err) {
-          console.error("App loadUser: problem loading user", err);
           setCurrentUser(null); // Clear current user on error
         }
       } else {
@@ -61,7 +60,22 @@ function App() {
       return { success: false, errors };
     }
   }
+  /** Update profile when user updates info on profile page **/
+  // App.js
 
+  async function updateProfile(newData) {
+    try {
+      const updatedUser = await JoblyApi.updateProfile(
+        currentUser.username,
+        newData
+      );
+      setCurrentUser(updatedUser); // Update the current user in state
+      return { success: true };
+    } catch (errors) {
+      console.error("Profile update failed", errors);
+      return { success: false, errors };
+    }
+  }
 
   /** Logout function */
   function logout() {
@@ -71,33 +85,55 @@ function App() {
 
   return (
     <div className="App">
-    <UserProvider value={{ currentUser }}>
-      <BrowserRouter>
-        <NavBar logout={logout} currentUser={currentUser} />
-        <Routes>
-          <Route path="/" element={<Homepage currentUser={currentUser} />} />
-          <Route 
-            path="/companies" 
-            element={<ProtectedRoute><CompanyList /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/companies/:handle" 
-            element={<ProtectedRoute><CompanyDetail /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/jobs" 
-            element={<ProtectedRoute><JobList /></ProtectedRoute>} 
-          />
-          <Route path="/login" element={<LoginForm login={login} />} />
-          <Route path="/signup" element={<SignupForm signup={signup} currentUser={currentUser} />} />
-          <Route 
-            path="/profile" 
-            element={<ProtectedRoute><ProfileForm currentUser={currentUser} /></ProtectedRoute>} 
-          />
-        </Routes>
-      </BrowserRouter>
-    </UserProvider>
-  </div>
+      <UserProvider value={{ currentUser }}>
+        <BrowserRouter>
+          <NavBar logout={logout} currentUser={currentUser} />
+          <Routes>
+            <Route path="/" element={<Homepage currentUser={currentUser} />} />
+            <Route
+              path="/companies"
+              element={
+                <ProtectedRoute>
+                  <CompanyList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/companies/:handle"
+              element={
+                <ProtectedRoute>
+                  <CompanyDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs"
+              element={
+                <ProtectedRoute>
+                  <JobList />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/login" element={<LoginForm login={login} />} />
+            <Route
+              path="/signup"
+              element={<SignupForm signup={signup} currentUser={currentUser} />}
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfileForm
+                    currentUser={currentUser}
+                    updateProfile={updateProfile}
+                  />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </UserProvider>
+    </div>
   );
 }
 
