@@ -28,6 +28,15 @@ function JobList() {
     getJobsAndApplications();
   }, [currentUser]);  // Re-run effect when currentUser changes
 
+  // handleApply function that will be passed to JobCard
+  const handleApply = async (jobId) => {
+    await JoblyApi.applyToJob(jobId);
+
+    // Refetch the applied jobs for the current user
+    const userResult = await JoblyApi.getCurrentUser(currentUser.username);
+    setAppliedJobs(new Set(userResult.applications));  // Update applied jobs
+  };
+
   if (isLoading) return <p>Loading jobs...</p>;  // Render loading message
 
   return (
@@ -43,6 +52,7 @@ function JobList() {
             salary={job.salary}
             equity={job.equity}
             hasApplied={appliedJobs.has(job.id)}  // Pass the applied status
+            handleApply={handleApply}  // Pass the handleApply function
           />
         ))
       ) : (
