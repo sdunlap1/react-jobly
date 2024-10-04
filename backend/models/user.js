@@ -123,26 +123,32 @@ class User {
 
   static async get(username) {
     const userRes = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
-        [username],
+      `SELECT username,
+              first_name AS "firstName",
+              last_name AS "lastName",
+              email,
+              is_admin AS "isAdmin"
+       FROM users
+       WHERE username = $1`,
+      [username]
     );
-
+  
     const user = userRes.rows[0];
-
     if (!user) throw new NotFoundError(`No user: ${username}`);
+    
+    // Fetch applied jobs for the user
+    const jobsRes = await db.query(
+      `SELECT job_id
+       FROM applications
+       WHERE username = $1`,
+      [username]
+    );
+  
+    // Map job IDs to an array and attach to the user object
+    user.applications = jobsRes.rows.map(a => a.job_id);
 
-    const userApplicationsRes = await db.query(
-          `SELECT a.job_id
-           FROM applications AS a
-           WHERE a.username = $1`, [username]);
-
-    user.applications = userApplicationsRes.rows.map(a => a.job_id);
+    console.log(`User: ${username}, Applied Jobs:`, user.applications);
+  
     return user;
   }
 

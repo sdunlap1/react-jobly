@@ -3,7 +3,7 @@
 /** Routes for jobs. */
 
 const jsonschema = require("jsonschema");
-
+const { ensureLoggedIn } = require("../middleware/auth");
 const express = require("express");
 const { BadRequestError } = require("../expressError");
 const { ensureAdmin } = require("../middleware/auth");
@@ -38,6 +38,26 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     return next(err);
   }
 });
+
+/** POST /[id]/apply => { applied: jobId }
+ *
+ * Allows a user to apply to a job.
+ *
+ * Returns {"applied": jobId}
+ *
+ * Authorization required: logged in
+ */
+router.post("/:id/apply", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const jobId = req.params.id;
+    const username = res.locals.user.username; // Use authenticated user's username
+    await Job.apply(username, jobId); // Call method to handle job application logic
+    return res.json({ applied: jobId });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 
 /** GET / =>
  *   { jobs: [ { id, title, salary, equity, companyHandle, companyName }, ...] }

@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import JoblyApi from '../api';
 import JobCard from '../components/JobCard'; // Reusable JobCard component
+import { useUser } from '../context/UserContext';  // Use useUser hook to access user
 import "../App.css"
 
 function JobList() {
+  const { currentUser } = useUser();  // Fetch current user from the useUser hook
   const [jobs, setJobs] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState(new Set()); // Set to store applied job IDs
   const [isLoading, setIsLoading] = useState(true);  // Add a loading state
 
   useEffect(() => {
-    async function getJobs() {
-      const result = await JoblyApi.getJobs();
-      setJobs(result);
+    async function getJobsAndApplications() {
+      // Fetch all jobs
+      const jobs = await JoblyApi.getJobs();
+      setJobs(jobs);
+
+      // Fetch applied jobs for the current user, if logged in
+      if (currentUser) {
+        const user = await JoblyApi.getCurrentUser(currentUser.username);
+        setAppliedJobs(new Set(user.applications));  // Store applied job IDs in a Set
+      }
+
       setIsLoading(false);  // Set loading to false after data is fetched
     }
-    getJobs();
-  }, []);
+
+    getJobsAndApplications();
+  }, [currentUser]);  // Re-run effect when currentUser changes
 
   if (isLoading) return <p>Loading jobs...</p>;  // Render loading message
 
@@ -30,6 +42,7 @@ function JobList() {
             title={job.title}
             salary={job.salary}
             equity={job.equity}
+            hasApplied={appliedJobs.has(job.id)}  // Pass the applied status
           />
         ))
       ) : (

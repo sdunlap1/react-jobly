@@ -44,6 +44,40 @@ class Job {
    * Returns [{ id, title, salary, equity, companyHandle, companyName }, ...]
    * */
 
+  /** Allow a user to apply for a job.
+   *
+   * Takes username and jobId as parameters.
+   * Returns { applied: jobId } if successful.
+   * Throws NotFoundError if job or user is not found.
+   */
+  static async apply(username, jobId) {
+    // Check if the job exists (optional, for more informative errors)
+    const jobRes = await db.query(
+      `SELECT id FROM jobs WHERE id = $1`,
+      [jobId]
+    );
+
+    if (!jobRes.rows[0]) throw new NotFoundError(`No job: ${jobId}`);
+
+    // Check if the user exists (optional, for more informative errors)
+    const userRes = await db.query(
+      `SELECT username FROM users WHERE username = $1`,
+      [username]
+    );
+
+    if (!userRes.rows[0]) throw new NotFoundError(`No user: ${username}`);
+
+    // Insert application into applications table
+    await db.query(
+      `INSERT INTO applications (username, job_id)
+       VALUES ($1, $2)
+       ON CONFLICT DO NOTHING`, // Prevents duplicate applications
+      [username, jobId]
+    );
+
+    return { applied: jobId };
+  }
+
   static async findAll({ minSalary, hasEquity, title } = {}) {
     let query = `SELECT j.id,
                         j.title,
